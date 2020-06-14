@@ -22,8 +22,8 @@ This node.js application is installed from the npm repository and executed with
 the node command.
 
 ```bash
-npm install -g mqtt2loxone
-node /usr/local/bin/mqtt2loxone
+npm install -g tasmota2mqtt2loxone
+node /usr/local/bin/tasmota2mqtt2loxone
 ```
 
 Alternatively, the module can be executed as a docker container. Use the
@@ -32,11 +32,11 @@ following Dockerfile to build a container injecting the config file.
 ```dockerfile
 FROM node:alpine
 
-RUN npm install -g mqtt2loxone
+RUN npm install -g tasmota2mqtt2loxone
 
-COPY config.json /etc/mqtt2loxone.json
+COPY config.json /etc/tasmota2mqtt2loxone.json
 
-ENTRYPOINT [ "/usr/local/bin/mqtt2loxone", "/etc/mqtt2loxone.json" ]
+ENTRYPOINT [ "/usr/local/bin/tasmota2mqtt2loxone", "/etc/tasmota2mqtt2loxone.json" ]
 ```
 
 ## Configuration
