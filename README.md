@@ -1,4 +1,4 @@
-# mqtt2loxone
+# tasmota2mqtt2loxone
 
 [![mqtt-smarthome](https://img.shields.io/badge/mqtt-smarthome-blue.svg?style=flat-square)](https://github.com/mqtt-smarthome/mqtt-smarthome)
 [![npm](https://img.shields.io/npm/v/mqtt2loxone.svg?style=flat-square)](https://www.npmjs.com/package/mqtt2loxone)
