@@ -17,6 +17,8 @@ const cfg = require(process.argv[2] || './config.json')
 log.setLevel(cfg.log)
 log.info(pkg.name + ' ' + pkg.version + ' starting')
 
+log.info('selfbuild Version 1.0.0')
+
 /**
  * SETUP MQTT
  */
@@ -61,21 +63,39 @@ mqttClient.on('message', (topic, payload, msg) => {
 
     log.info('mqtt: message ' + topic + ' ' + payload.toString())
 
+    log.info('mqtt: testing payload');
+
     // Try to parse the payload. If not possible, add null as payload.
-    const payloadString = payload.toString()
+    const payloadString = payload.toString().Trim()
     if (!isNaN(payloadString)) {
         payload = {
             val: Number(payloadString),
             name: 'unknown'
         }
     } else {
-        try {
-            payload = JSON.parse(payloadString)
-        } catch (error) {
+        //If the payload contains Tasmota [ON,OFF] values change them to numeric values so we can use them as an analog value inside loxone.
+        if(payloadString == 'ON')
+        {
+            log.info('mqtt: payload ON is converted to 1');
             payload = {
-                val: null,
+                val: 1,
                 name: 'unknown'
             }
+        } else if(payloadString == 'OFF') {
+            log.info('mqtt: payload OFF is converted to 0');
+                payload = {
+                val: 0,
+                    name: 'unknown'
+                }
+        } else {
+                try {
+                    payload = JSON.parse(payloadString)
+                } catch (error) {
+                    payload = {
+                        val: null,
+                        name: 'unknown'
+                    }
+                }   
         }
     }
 
