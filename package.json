@@ -10,7 +10,7 @@
   ],
   "main": "index.js",
   "bin": {
-    "mqtt2loxone": "index.js"
+    "tasmota2mqtt2loxone": "index.js"
   },
   "repository": {
     "type": "git",
