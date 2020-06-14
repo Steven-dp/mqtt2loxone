@@ -17,8 +17,6 @@ const cfg = require(process.argv[2] || './config.json')
 log.setLevel(cfg.log)
 log.info(pkg.name + ' ' + pkg.version + ' starting')
 
-log.info('selfbuild Version 1.0.0')
-
 /**
  * SETUP MQTT
  */
@@ -66,7 +64,7 @@ mqttClient.on('message', (topic, payload, msg) => {
     log.info('mqtt: testing payload');
 
     // Try to parse the payload. If not possible, add null as payload.
-    const payloadString = payload.toString().Trim()
+    const payloadString = payload.toString()
     if (!isNaN(payloadString)) {
         payload = {
             val: Number(payloadString),
