@@ -63,37 +63,56 @@ mqttClient.on('message', (topic, payload, msg) => {
 
     log.info('mqtt: testing payload');
 
-    // Try to parse the payload. If not possible, add null as payload.
     const payloadString = payload.toString()
-    if (!isNaN(payloadString)) {
-        payload = {
-            val: Number(payloadString),
-            name: 'unknown'
-        }
-    } else {
-        //If the payload contains Tasmota [ON,OFF] values change them to numeric values so we can use them as an analog value inside loxone.
-        if(payloadString == 'ON')
-        {
-            log.info('mqtt: payload ON is converted to 1');
+    
+    //check if we received something of the RFbridge
+    if(topic.includes("RFBridge1")){
+        //get the RfReceived object its Data property
+        try {
+            payload = JSON.parse(payloadString);
+            let Datanode = payload.RfReceived.Data.toString();
+            topic = 'loxone/' + Datanode + '/cmnd/POWER=1';
             payload = {
                 val: 1,
                 name: 'unknown'
             }
-        } else if(payloadString == 'OFF') {
-            log.info('mqtt: payload OFF is converted to 0');
+        } catch (error) {
+                    log.info('Could not parse RFBridge playload!');
+                }   
+    }
+    else
+    {
+        // Try to parse the payload. If not possible, add null as payload.
+        if (!isNaN(payloadString)) {
+            payload = {
+                val: Number(payloadString),
+                name: 'unknown'
+            }
+        } else {
+            //If the payload contains Tasmota [ON,OFF] values change them to numeric values so we can use them as an analog value inside loxone.
+            if(payloadString == 'ON')
+            {
+                log.info('mqtt: payload ON is converted to 1');
                 payload = {
-                val: 0,
+                    val: 1,
                     name: 'unknown'
                 }
-        } else {
-                try {
-                    payload = JSON.parse(payloadString)
-                } catch (error) {
+            } else if(payloadString == 'OFF') {
+                log.info('mqtt: payload OFF is converted to 0');
                     payload = {
-                        val: null,
+                    val: 0,
                         name: 'unknown'
                     }
-                }   
+            } else {
+                    try {
+                        payload = JSON.parse(payloadString)
+                    } catch (error) {
+                        payload = {
+                            val: null,
+                            name: 'unknown'
+                        }
+                    }   
+            }
         }
     }
 
