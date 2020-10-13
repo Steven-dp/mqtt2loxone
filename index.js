@@ -71,7 +71,7 @@ mqttClient.on('message', (topic, payload, msg) => {
         try {
             payload = JSON.parse(payloadString);
             let Datanode = payload.RfReceived.Data.toString();
-            topic = 'loxone/' + Datanode + '/cmnd/POWER=1';
+            topic = 'loxone/' + Datanode + '/cmnd/POWER';
             payload = {
                 val: 1,
                 name: 'unknown'
