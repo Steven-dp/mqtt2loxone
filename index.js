@@ -78,6 +78,8 @@ mqttClient.on('message', (topic, payload, msg) => {
             }
         } catch (error) {
                     log.info('Could not parse RFBridge playload!');
+                    return;
+                    log.info('went out of the program!');
                 }   
     }
     else
