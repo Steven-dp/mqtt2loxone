@@ -76,6 +76,7 @@ mqttClient.on('message', (topic, payload, msg) => {
                 val: 1,
                 name: 'unknown'
             }
+            setTimeout(sendPowerOffMQTT, 5000, Datanode);
         } catch (error) {
                     log.info('Could not parse RFBridge playload!');
                     return;
@@ -151,6 +152,29 @@ mqttClient.on('message', (topic, payload, msg) => {
         })
     }
 })
+
+/**
+ * Auto Power off functions
+ * Mainly used for motions sensors
+ */
+
+function sendPowerOffMQTT(datanode) {
+    let message = 'loxone/' + datanode + '/cmnd/POWER';
+    let payload = {
+                val: 0,
+                name: 'unknown'
+            }
+    log.info('udp client: send automated OFF datagram ' + message)
+
+    const udpClient = dgram.createSocket('udp4')
+    udpClient.send(message, cfg.loxone.port, cfg.loxone.host, (error) => {
+        if (error) {
+            log.error('udp client error: ' + error)
+        }
+        udpClient.close()
+     })
+}
+
 
 /**
  * UDP SERVER
