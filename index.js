@@ -8,7 +8,8 @@
 const log = require('yalm')
 const mqtt = require('mqtt')
 const dgram = require('dgram')
-const request = require('request')
+//const request = require('request')//depricated!!
+const axios = require('axios');
 const encodeurl = require('encodeurl')
 
 const pkg = require('./package.json')
@@ -157,6 +158,16 @@ mqttClient.on('message', (topic, payload, msg) => {
                     log.error('http client error: ' + error)
                 }
             })
+
+            axios.get(url)
+                .then(res => {
+                    //do nothing
+                    log.info(`statusCode: ${res.status}`);
+                    //console.log(res);
+                })
+                .catch(error => {
+                    log.error('http client error: ' + error)
+                });
         }
     }
 })
