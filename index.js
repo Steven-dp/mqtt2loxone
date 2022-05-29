@@ -37,10 +37,11 @@ mqttClient.on('connect', () => {
     mqttConnected = true
     log.info('mqtt: connected ' + cfg.mqtt.url)
 
-    mqttClient.subscribe(cfg.mqtt.name + '/set/#')
+    //mqttClient.subscribe(cfg.mqtt.name + '/set/#')
 
     for (const subscriptionKey in cfg.loxone.subscriptions) {
         mqttClient.subscribe(cfg.loxone.subscriptions[subscriptionKey])
+        log.info('mqtt: subscribed to ' + cfg.loxone.subscriptions[subscriptionKey])
     }
 })
 
@@ -59,97 +60,104 @@ mqttClient.on('error', err => {
 
 mqttClient.on('message', (topic, payload, msg) => {
 
-    log.info('mqtt: message ' + topic + ' ' + payload.toString())
+    //enable for debugging purposes
+    //log.info('mqtt: message ' + topic + ' ' + payload.toString())
 
-    log.info('mqtt: testing payload');
-
-    const payloadString = payload.toString()
-    
-    //check if we received something of the RFbridge
-    if(topic.includes("RFBridge1")){
-        //get the RfReceived object its Data property
-        try {
-            payload = JSON.parse(payloadString);
-            let Datanode = payload.RfReceived.Data.toString();
-            topic = 'loxone/' + Datanode + '/cmnd/POWER';
-            payload = {
-                val: 1,
-                name: 'unknown'
-            }
-            setTimeout(sendPowerOffMQTT, 5000, Datanode);
-        } catch (error) {
-                    log.info('Could not parse RFBridge playload!');
-                    return;
-                    log.info('went out of the program!');
-                }   
-    }
-    else
+    //discard info messages
+    if(((topic.includes('/stat/') || topic.includes('/connected')) == false) && (topic.includes('/tele/') == false || ((topic.includes('/tele/') == true) && (topic.includes('/RFBridge1/') == true))))
     {
-        // Try to parse the payload. If not possible, add null as payload.
-        if (!isNaN(payloadString)) {
-            payload = {
-                val: Number(payloadString),
-                name: 'unknown'
-            }
-        } else {
-            //If the payload contains Tasmota [ON,OFF] values change them to numeric values so we can use them as an analog value inside loxone.
-            if(payloadString == 'ON')
-            {
-                log.info('mqtt: payload ON is converted to 1');
+        log.info('mqtt: message ' + topic + ' ' + payload.toString())
+
+        log.info('mqtt: testing payload');
+
+        const payloadString = payload.toString()
+        
+        //check if we received something of the RFbridge
+        if(topic.includes("RFBridge1")){
+            //get the RfReceived object its Data property
+            try {
+                payload = JSON.parse(payloadString);
+                let Datanode = payload.RfReceived.Data.toString();
+                topic = 'loxone/' + Datanode + '/cmnd/POWER';
                 payload = {
                     val: 1,
                     name: 'unknown'
                 }
-            } else if(payloadString == 'OFF') {
-                log.info('mqtt: payload OFF is converted to 0');
+                setTimeout(sendPowerOffMQTT, 5000, Datanode);
+            } catch (error) {
+                        log.info('Could not parse RFBridge playload!');
+                        return;
+                        log.info('went out of the program!');
+                    }   
+        }
+        else
+        {
+            // Try to parse the payload. If not possible, add null as payload.
+            if (!isNaN(payloadString)) {
+                payload = {
+                    val: Number(payloadString),
+                    name: 'unknown'
+                }
+            } else {
+                //If the payload contains Tasmota [ON,OFF] values change them to numeric values so we can use them as an analog value inside loxone.
+                if(payloadString == 'ON')
+                {
+                    log.info('mqtt: payload ON is converted to 1');
                     payload = {
-                    val: 0,
+                        val: 1,
                         name: 'unknown'
                     }
-            } else {
-                    try {
-                        payload = JSON.parse(payloadString)
-                    } catch (error) {
+                } else if(payloadString == 'OFF') {
+                    log.info('mqtt: payload OFF is converted to 0');
                         payload = {
-                            val: null,
+                        val: 0,
                             name: 'unknown'
                         }
-                    }   
+                } else {
+                        try {
+                            payload = JSON.parse(payloadString)
+                        } catch (error) {
+                            payload = {
+                                val: null,
+                                name: 'unknown'
+                            }
+                        }   
+                }
             }
         }
-    }
 
-    // Use the udp datagram api for non-text like bool, number, null.
-    if (typeof (payload.val) !== 'string') {
+        // Use the udp datagram api for non-text like bool, number, null.
+        if (typeof (payload.val) !== 'string') {
 
-        let message = topic
-        if (payload.val != null) {
-            message += '=' + payload.val
+            let message = topic
+            if (payload.val != null) {
+                message += '=' + payload.val
+            }
+
+            log.info('udp client: send datagram ' + message)
+
+            const udpClient = dgram.createSocket('udp4')
+            udpClient.send(message, cfg.loxone.port, cfg.loxone.host, (error) => {
+                if (error) {
+                    log.error('udp client error: ' + error)
+                }
+                udpClient.close()
+            })
         }
 
-        log.info('udp client: send datagram ' + message)
+        // Use http, if the payload is a text value.
+        if (typeof (payload.val) === 'string') {
 
-        const udpClient = dgram.createSocket('udp4')
-        udpClient.send(message, cfg.loxone.port, cfg.loxone.host, (error) => {
-            if (error) {
-                log.error('udp client error: ' + error)
-            }
-            udpClient.close()
-        })
-    }
+            const url = encodeurl('http://' + cfg.loxone.username + ':' + cfg.loxone.password + '@' + cfg.loxone.host + '/dev/sps/io/' + payload.name + '/' + payload.val)
 
-    // Use http, if the payload is a text value.
-    if (typeof (payload.val) === 'string') {
+            log.info('http client: invoke request http://' + cfg.loxone.host + '/dev/sps/io/' + payload.name + '/' + payload.val)
 
-        const url = encodeurl('http://' + cfg.loxone.username + ':' + cfg.loxone.password + '@' + cfg.loxone.host + '/dev/sps/io/' + payload.name + '/' + payload.val)
-
-        log.info('http client: invoke request http://' + cfg.loxone.host + '/dev/sps/io/' + payload.name + '/' + payload.val)
-
-        request(url, (error, response, body) => {
-            if (error) {
-                log.error('http client error: ' + error)
-            }
-        })
+            request(url, (error, response, body) => {
+                if (error) {
+                    log.error('http client error: ' + error)
+                }
+            })
+        }
     }
 })
 
