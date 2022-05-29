@@ -73,7 +73,7 @@ MiniServer. The virtual output must be configured with the address pointing to
 the ip address of mqtt2loxone and the specified port. Also remove the `;`
 separator in the virtual output.
 
-![UDP Virtual Output](https://github.com/claudiospizzi/mqtt2loxone/blob/master/assets/loxone-virtualoutputudp.png?raw=true)
+![UDP Virtual Output](https://raw.githubusercontent.com/claudiospizzi/mqtt2loxone/main/assets/loxone-virtualoutputudp.png)
 
 Within the virtual output, a virtual output command can be created to specify
 what will be send to the mqtt broker. Please use the option digital output. For
@@ -81,7 +81,7 @@ the field `Command On` specify the mqtt command in the following format:
 
 * `<topic>;<value>;<qos>;<retain>;<name>;<mode>`
 
-![UDP Virtual Output Command](https://github.com/claudiospizzi/mqtt2loxone/blob/master/assets/loxone-virtualoutputudp-command.png?raw=true)
+![UDP Virtual Output Command](https://raw.githubusercontent.com/claudiospizzi/mqtt2loxone/main/assets/loxone-virtualoutputudp-command.png)
 
 By the way, you can also use the logger component in loxone with the UDP target
 to log change or status messages to mqtt.
@@ -91,18 +91,18 @@ to log change or status messages to mqtt.
 The virtual udp input can be used to receive commands and numeric values. Just
 specify the udp port and optionally the remote ip.
 
-![UDP Virtual Input](https://github.com/claudiospizzi/mqtt2loxone/blob/master/assets/loxone-virtualinputudp.png?raw=true)
+![UDP Virtual Input](https://raw.githubusercontent.com/claudiospizzi/mqtt2loxone/main/assets/loxone-virtualinputudp.png)
 
 Afterwards, for every topic create a udp virtual input command. If it's just a
 command without any value, just use the digital input option. Else, append the
 string `=\v` to the topic and use an analogue input.
 
-![UDP Virtual Input Command](https://github.com/claudiospizzi/mqtt2loxone/blob/master/assets/loxone-virtualinputudp-command.png?raw=true)
+![UDP Virtual Input Command](https://raw.githubusercontent.com/claudiospizzi/mqtt2loxone/main/assets/loxone-virtualinputudp-command.png)
 
 ### Virtual Text Input
 
 If you want to publish text to the Loxone MiniServer, the udp virtual input will not work. You have to use the virtual text input and specify a name. This module will automatically detect text and invoke a http query to update the text, by using the `name` property in the mqtt payload to identify the virtual text input.
 
-![Virtual Text Input](https://github.com/claudiospizzi/mqtt2loxone/blob/master/assets/loxone-virtualinputtext.png?raw=true)
+![Virtual Text Input](https://raw.githubusercontent.com/claudiospizzi/mqtt2loxone/main/assets/loxone-virtualinputtext.png)
 
 [Loxone Smart Home]: https://www.loxone.com/
